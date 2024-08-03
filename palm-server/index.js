@@ -2,6 +2,9 @@ require("dotenv").config();
 const { TextServiceClient } = require("@google-ai/generativelanguage").v1beta2;
 const express = require("express");
 const app = express();
+
+app.use(express.json())
+
 const { GoogleAuth } = require("google-auth-library");
 
 const MODEL_NAME = "models/text-bison-001";
@@ -14,9 +17,9 @@ const client = new TextServiceClient({
 });
 
 let answer = null
-const prompt = "Repeat after me: one, two,";
 
-app.get('/api', (req, res) => {
+app.post('/api', (req, res) => {
+    const { prompt } = req.body
     client
         .generateText({
             model: MODEL_NAME,
@@ -26,7 +29,7 @@ app.get('/api', (req, res) => {
         })
         .then((result) => {
             answer = result[0].candidates[0].output
-            res.send(answer)
+            res.json(answer)
             console.log(JSON.stringify(result, null, 2));
         }).catch(err => {
             console.log(err.details)
